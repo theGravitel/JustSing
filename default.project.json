@@ -12,7 +12,6 @@
         "PaintPart": { "$className": "RemoteEvent" },
         "PaintFleck": { "$className": "RemoteEvent" },
         "SetPose": { "$className": "RemoteEvent" },
-        "RoundStateChanged": { "$className": "RemoteEvent" },
         "SavePalette": { "$className": "RemoteFunction" },
         "GetPalette": { "$className": "RemoteFunction" }
       }

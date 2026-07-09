@@ -1,9 +1,9 @@
 # MECCHA CHAMELEON — Scripted Base
 
-A Roblox hide-and-seek game where you paint your blank R6 "brick" character
-to blend into the environment. This repo is the **scripted base**: input,
-painting, coloring, posing, and a minimal round loop. No art/assets, no
-level design — just the systems.
+A Roblox game where you paint your blank R6 "brick" character to blend
+into the environment. This repo is the **scripted base**: just the
+painting mechanic — input, coloring, and posing. No round/match structure,
+no art/assets, no level design.
 
 ## Project layout (Rojo)
 
@@ -21,13 +21,11 @@ src/
     CharacterSetup.server.lua     -- forces R6 avatars, strips clothes, preps paintable parts
     PaintService.server.lua       -- validates & applies paint (RemoteEvents)
     PaletteService.server.lua     -- saves/loads palettes via DataStore
-    RoundService.server.lua       -- basic hide-and-seek round loop
   StarterPlayer/StarterPlayerScripts/
     PaintController.client.lua    -- spacebar eyedropper, F paint mode, brush resize, apply paint
     ColorWheelUI.client.lua       -- hue strip + SV square color picker, palette swatches
     PoseController.client.lua     -- crouch / lie down / stretch poses
     CameraPreview.client.lua      -- "hunter's perspective" orbit camera check
-    RoundHud.client.lua           -- round phase/timer display
 ```
 
 `Remotes` (RemoteEvents/RemoteFunctions) are declared directly in
@@ -40,7 +38,7 @@ those instances for you, no manual setup needed in Studio.
 2. From this folder: `rojo serve`
 3. In Studio: open the Rojo plugin panel and click **Connect**.
 4. Play-test with 2+ local server instances (Studio's "Start" with multiple
-   clients) to see painting/poses/round phases replicate between players.
+   clients) to see painting/poses replicate between players.
 
 ## Why R6
 
@@ -86,6 +84,7 @@ spawn so the brick colors are always visible.
 
 ## What's *not* included (out of scope for this base)
 
+- Any round/match structure (hiding phase, seeking phase, tagging, timers)
 - Level/map geometry and hiding spots
 - Scoring, matchmaking, lobby UI
 - Anti-exploit hardening beyond basic server-side validation/clamping/debounce
