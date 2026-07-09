@@ -1,0 +1,6 @@
+*.rbxl
+*.rbxlx
+*.rbxlx.lock
+sourcemap.json
+.vscode/
+*.log

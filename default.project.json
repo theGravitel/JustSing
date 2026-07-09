@@ -1,0 +1,30 @@
+{
+  "name": "MecchaChameleon",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "Shared": {
+        "$path": "src/ReplicatedStorage/Shared"
+      },
+      "Remotes": {
+        "$className": "Folder",
+        "PaintPart": { "$className": "RemoteEvent" },
+        "PaintFleck": { "$className": "RemoteEvent" },
+        "SetPose": { "$className": "RemoteEvent" },
+        "RoundStateChanged": { "$className": "RemoteEvent" },
+        "SavePalette": { "$className": "RemoteFunction" },
+        "GetPalette": { "$className": "RemoteFunction" }
+      }
+    },
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService"
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayer/StarterPlayerScripts"
+      }
+    }
+  }
+}
