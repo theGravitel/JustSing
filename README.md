@@ -1,94 +1,76 @@
-# MECCHA CHAMELEON — Scripted Base
+# MECCHA CHAMELEON — Paint System
 
-A Roblox game where you paint your blank R6 "brick" character to blend
-into the environment. This repo is the **scripted base**: just the
-painting mechanic — input, coloring, and posing. No round/match structure,
-no art/assets, no level design.
+Just the painting mechanic: paint your blank R6 "brick" character to blend
+into the environment. Two scripts, both print heavily to the Output window
+so you can see exactly what's happening.
 
-## Project layout (Rojo)
-
-This is a source-only [Rojo](https://rojo.space/) project — there's no
-`.rbxl` place file checked in. Open it in Studio with the Rojo plugin:
+## Files
 
 ```
 default.project.json
 src/
-  ReplicatedStorage/Shared/       -- shared config + helpers (server & client)
-    PaintConfig.lua               -- keybinds, brush/palette tuning, paintable part list
-    PaintState.lua                -- mutable client-side held color / brush size
-    CharacterRigUtil.lua          -- which parts a brush stroke touches
   ServerScriptService/
-    CharacterSetup.server.lua     -- forces R6 avatars, strips clothes, preps paintable parts
-    PaintService.server.lua       -- validates & applies paint (RemoteEvents)
-    PaletteService.server.lua     -- saves/loads palettes via DataStore
+    PaintServer.server.lua       -- Script: forces R6, strips clothes, applies paint
   StarterPlayer/StarterPlayerScripts/
-    PaintController.client.lua    -- spacebar eyedropper, F paint mode, brush resize, apply paint
-    ColorWheelUI.client.lua       -- hue strip + SV square color picker, palette swatches
-    PoseController.client.lua     -- crouch / lie down / stretch poses
-    CameraPreview.client.lua      -- "hunter's perspective" orbit camera check
+    PaintClient.client.lua       -- LocalScript: input, color swatches, eyedropper
 ```
 
-`Remotes` (RemoteEvents/RemoteFunctions) are declared directly in
-`default.project.json` under `ReplicatedStorage.Remotes` — Rojo creates
-those instances for you, no manual setup needed in Studio.
+If you're setting this up by hand in Studio instead of using Rojo:
 
-### Running it
+1. `PaintServer.server.lua` → paste into a **Script** named `PaintServer` in **ServerScriptService**.
+2. `PaintClient.client.lua` → paste into a **LocalScript** named `PaintClient` in **StarterPlayer > StarterPlayerScripts**.
+3. That's it — **you don't need to create a Remotes folder or any RemoteEvent yourself.** `PaintServer` creates `ReplicatedStorage.Remotes.PaintPart` automatically the first time it runs if it doesn't already exist. If you already made a `Remotes` folder, that's fine too — the script reuses it and just adds `PaintPart` inside if it's missing.
 
-1. Install the [Rojo Studio plugin](https://rojo.space/docs/v7/getting-started/installation/) and the `rojo` CLI (via [Aftman](https://github.com/LPGhatguy/aftman) or standalone).
-2. From this folder: `rojo serve`
-3. In Studio: open the Rojo plugin panel and click **Connect**.
-4. Play-test with 2+ local server instances (Studio's "Start" with multiple
-   clients) to see painting/poses replicate between players.
+Getting the script *type* right matters: a Script in the wrong service, or a LocalScript where a Script should be (or vice versa), simply won't run — with no error. Double check:
+- `PaintServer` must be a **Script** (not LocalScript) inside **ServerScriptService**.
+- `PaintClient` must be a **LocalScript** (not Script) inside **StarterPlayer > StarterPlayerScripts**.
+
+## Diagnosing with the Output window
+
+Open **View > Output** in Studio before pressing Play. Every step prints a
+`[PaintServer]` or `[PaintClient]` line:
+
+- `[PaintServer] script started` / `[PaintClient] script started` — the script is running at all. If you never see these, the script is the wrong type, in the wrong place, or disabled.
+- `[PaintServer] ReplicatedStorage.Remotes was missing, created it` — confirms the server just built the remote for you.
+- `[PaintClient] found Remotes.PaintPart, setting up UI and input` — the client connected successfully. If instead you see a `warn` saying it never appeared after 10s, the server script isn't running (check the two "script started" lines above).
+- `[PaintServer] appearance loaded for <name> - prepping paintable parts` then `is ready to paint` — your character's limbs are set up. If you see `expected part not found on character: X`, your avatar isn't R6 yet (rejoin/reset the character — `Players.AvatarType` only affects characters spawned *after* it's set).
+- `[PaintClient] eyedropper: no BasePart under the cursor` — Space was pressed but nothing valid was aimed at.
+- `[PaintClient] painting <part> with <color>` and `[PaintServer] painted <part> for <name>` — a successful paint, client then server confirming it applied.
+
+If nothing prints at all when you press Play, the scripts weren't placed correctly — re-check step 1/2 above (service + script type).
 
 ## Why R6
 
 Every player is forced into the classic **R6** avatar
-(`Players.AvatarType = Enum.AvatarType.R6`) instead of R15/Rthro. R6 bodies
-are exactly six single `BasePart`s — `Head`, `Torso`, `Left Arm`,
-`Right Arm`, `Left Leg`, `Right Leg` — so each limb *is* a paintable brick
-with no custom rig-building required. Clothing/accessories are stripped on
-spawn so the brick colors are always visible.
+(`Players.AvatarType = Enum.AvatarType.R6`). R6 bodies are exactly six
+single `BasePart`s — `Head`, `Torso`, `Left Arm`, `Right Arm`, `Left Leg`,
+`Right Leg` — so each limb *is* a paintable brick with no custom rig
+needed. Clothing/accessories are stripped on spawn so the brick colors are
+always visible. This only takes effect for characters that spawn *after*
+the setting changes, so if you're testing with an already-R15 avatar,
+reset your character once.
 
 ## Controls
 
 | Input | Action |
 |---|---|
-| **Space** | Eyedropper — aim at any object and copy its color onto your *whole* body (quick base coat) |
+| **Space** | Eyedropper — copies the color of whatever you're aiming at onto your *whole* body |
+| **Click a swatch** (bottom of screen) | Sets the held color without needing to eyedrop |
 | **F** | Toggle Paint Mode |
-| **Right-click + drag** (Paint Mode) | Resize brush |
-| **Left-click** (Paint Mode) | Paint the limb you're aiming at with the held color — large brush recolors the whole limb (and links to neighboring limbs at max size), small brush drops fine color "flecks" for matching busy textures |
-| **C** | Toggle Crouch |
-| **Z** | Toggle Lie Down |
-| **X** | Toggle Stretch |
-| **V** | Stand |
-| **P** | Toggle hunter's-perspective orbit camera (check your camouflage from a distance) |
-| **"Colors" button** (bottom-right) | Open the color picker: drag the hue strip and saturation/value square to choose any color, click a palette swatch to select a saved color, Shift+Click a swatch to save the current color into it |
+| **Left-click** (Paint Mode on) | Paints the limb you're aiming at (on yourself) with the held color |
 
-## How painting works under the hood
+## How it works
 
-- **Base coat / large brush** — `PaintPartRemote:FireServer(partName, color, brushSize)`.
-  The server (`PaintService`) validates the part name, clamps the color and
-  brush size, and recolors the `BasePart.Color` directly. Recoloring
-  replicates to everyone automatically since it's just a property change on
-  a networked part.
-- **Fine detail / small brush** — `PaintFleckRemote:FireServer(partName, color, hitPosition)`.
-  The server spawns a small colored ball `Part`, welds it to the limb at
-  the hit position, and caps the count per limb (`MaxFlecksPerPart`) to
-  avoid runaway part growth. This is what makes "quick random swipes"
-  create dot-like texture instead of a flat color change.
-- **Palettes** — saved per-player via `SavePaletteRemote`/`GetPaletteRemote`
-  (RemoteFunctions) to a DataStore, keyed by `UserId`.
-- **Poses** — done client-side by tweening R6 `Motor6D` joint `C0` offsets
-  directly (no animation assets needed for this base), with
-  `Humanoid.PlatformStand` toggled so physics doesn't fight the pose.
+- Client fires `Remotes.PaintPart:FireServer(partName, color)`.
+- Server (`PaintServer`) validates the part name is one of the six R6
+  limbs, clamps the color, and sets `part.Color` directly — that
+  replicates to everyone automatically since it's just a normal property
+  change on a networked part.
 
-## What's *not* included (out of scope for this base)
+## What's not included (by design — this is just the paint system)
 
-- Any round/match structure (hiding phase, seeking phase, tagging, timers)
-- Level/map geometry and hiding spots
-- Scoring, matchmaking, lobby UI
-- Anti-exploit hardening beyond basic server-side validation/clamping/debounce
-- True pixel/UV texture painting (the small-brush "fleck" system approximates
-  fine detail without needing `EditableImage`/UV mapping)
+- Palettes/saving colors, a full hue-wheel picker, fine detail "brush" texture, brush sizing
+- Poses, hunter's-perspective camera check
+- Any round/match structure
 
-These are natural next steps once the base is verified in Studio.
+These can be layered back on top once this base is confirmed working.

@@ -3,18 +3,7 @@
   "tree": {
     "$className": "DataModel",
     "ReplicatedStorage": {
-      "$className": "ReplicatedStorage",
-      "Shared": {
-        "$path": "src/ReplicatedStorage/Shared"
-      },
-      "Remotes": {
-        "$className": "Folder",
-        "PaintPart": { "$className": "RemoteEvent" },
-        "PaintFleck": { "$className": "RemoteEvent" },
-        "SetPose": { "$className": "RemoteEvent" },
-        "SavePalette": { "$className": "RemoteFunction" },
-        "GetPalette": { "$className": "RemoteFunction" }
-      }
+      "$className": "ReplicatedStorage"
     },
     "ServerScriptService": {
       "$path": "src/ServerScriptService"
